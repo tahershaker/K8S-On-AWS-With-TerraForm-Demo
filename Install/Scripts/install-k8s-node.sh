@@ -1215,7 +1215,7 @@ if [[ "$NODE_ROLE" == "master" && "$IS_FIRST_MASTER" == "yes" ]]; then
 
   # --- Install Calico ---
   if [[ "$CNI_CHOICE" == "calico" ]]; then
-    # Print message that Calico installation is starting
+        # Print message that Calico installation is starting
     echo -e "${YELLOW} - Installing Calico...${NC}"
     echo ""
 
@@ -1233,18 +1233,25 @@ if [[ "$NODE_ROLE" == "master" && "$IS_FIRST_MASTER" == "yes" ]]; then
     # Print the Calico version that will be installed
     echo -e "${CYAN}   Latest Calico release: ${CALICO_VERSION}${NC}"
 
+    # Install the projectcalico.org/v1 CRDs
+    kubectl create -f "https://raw.githubusercontent.com/projectcalico/calico/${CALICO_VERSION}/manifests/v1_crd_projectcalico_org.yaml"
+
     # Install the Tigera operator, which manages the Calico installation
     kubectl create -f "https://raw.githubusercontent.com/projectcalico/calico/${CALICO_VERSION}/manifests/tigera-operator.yaml"
 
+    # Wait for the Installation CRD to be registered before applying resources that depend on it
+    echo -e "${YELLOW} - Waiting for Tigera operator CRDs to be ready...${NC}"
+    kubectl wait --for=condition=Established --timeout=60s crd/installations.operator.tigera.io
+
     # Download the custom-resources manifest that configures Calico
-    curl -fsSL "https://raw.githubusercontent.com/projectcalico/calico/${CALICO_VERSION}/manifests/custom-resources.yaml" \
+    curl -fsSL "https://raw.githubusercontent.com/projectcalico/calico/${CALICO_VERSION}/manifests/custom-resources-bpf.yaml" \
       -o /tmp/calico-custom-resources.yaml
 
     # Set the Pod CIDR in the manifest to match the CIDR provided earlier
     sed -i "s#cidr: 192.168.0.0/16#cidr: ${POD_CIDR}#" /tmp/calico-custom-resources.yaml
 
     # Apply the Calico custom resources
-    kubectl apply -f /tmp/calico-custom-resources.yaml
+    kubectl create -f /tmp/calico-custom-resources.yaml
 
     # Confirm Calico installation completed
     echo -e "${GREEN}   Calico ${CALICO_VERSION} installed, Pod CIDR set to ${POD_CIDR}.${NC}"
