@@ -29,6 +29,10 @@ output "kube-worker-02-private-ip" {
   value = aws_instance.kube-worker-02.private_ip
 }
 
+output "lb_fqdn" {
+  value = aws_lb.nlb-01.dns_name
+}
+
 output "Deployment-Outputs" {
   value = <<EOF
   ========================================================
@@ -36,6 +40,7 @@ output "Deployment-Outputs" {
   ------------------------------------------------------
   - Bastion Host Public IP:                     ${aws_instance.bastion-01.public_ip}
   - Load Balancer Public IP:                    ${aws_eip.lb-eip.public_ip}
+  - Load Balancer FQDN:                         ${aws_lb.nlb-01.dns_name}
   - SSH Key Name:                               ${aws_key_pair.demo-ssh-key-pair-01.key_name}
   - Kube Master Node-01 Private IP:             ${aws_instance.kube-master-01.private_ip}
   - Kube Worker Node-01 Private IP:             ${aws_instance.kube-worker-01.private_ip}

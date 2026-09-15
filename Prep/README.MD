@@ -67,6 +67,8 @@ Confirm it's there and marked default (look for `(default)` next to `local-path`
 kubectl get storageclass
 ```
 
+![storageclass](/Install/Image/storageclass.png)
+
 ### Step 2 — Install the NGINX ingress controller
 
 ```bash
@@ -90,6 +92,8 @@ Confirm one pod is running per node, each bound to the host network:
 kubectl get pods -n ingress-nginx -o wide
 ```
 
+![ingress](/Install/Image/ingress.png)
+
 ### Step 3 — Confirm the Load Balancer can reach it
 
 From outside the cluster (your own machine is fine — the Load Balancer is internet-facing):
@@ -99,6 +103,8 @@ curl -i http://<lb_public_eip_public_ip from your Terraform output>
 ```
 
 A `404` from `nginx` is the expected response at this point — it confirms the Load Balancer is reaching the ingress controller. There's nothing behind it to route to yet; that's what each demo adds.
+
+![curl-result](/Install/Image/curl-result.png)
 
 ---
 
