@@ -177,6 +177,7 @@ From the bastion host:
 
 ```bash
 # Copy the kubeconfig from the master node to the bastion
+mkdir -p "$HOME/.kube"
 scp -i <path-to-your-key.pem> <node-user>@<master-node-private-ip>:/etc/kubernetes/admin.conf ~/.kube/config
 
 # Make sure only you can read it
