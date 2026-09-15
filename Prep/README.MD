@@ -75,7 +75,7 @@ Confirm it's there and marked default (look for `(default)` next to `local-path`
 kubectl get storageclass
 ```
 
-![storageclass](/Install/Image/storageclass.png)
+![storageclass](/Prep/Image/storageclass.png)
 
 ---
 
