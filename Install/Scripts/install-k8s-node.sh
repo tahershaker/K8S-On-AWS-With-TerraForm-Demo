@@ -1076,7 +1076,7 @@ if [[ "$NODE_ROLE" == "master" && "$IS_FIRST_MASTER" == "yes" ]]; then
   echo ""
 
   # Build the base kubeadm init arguments
-  INIT_ARGS=(--kubernetes-version="v${K8S_MAJOR_MINOR}" --pod-network-cidr="${POD_CIDR}" --service-cidr="${SVC_CIDR}")
+  INIT_ARGS=(--kubernetes-version="stable-${K8S_MAJOR_MINOR}" --pod-network-cidr="${POD_CIDR}" --service-cidr="${SVC_CIDR}")
 
   # If there are 3 masters, add the control-plane endpoint and upload-certs flags
   if [[ "$MASTER_COUNT" == "3" ]]; then
@@ -1218,7 +1218,7 @@ if [[ "$NODE_ROLE" == "master" && "$IS_FIRST_MASTER" == "yes" ]]; then
     # Print message that Calico installation is starting
     echo -e "${YELLOW} - Installing Calico...${NC}"
     echo ""
-    
+
     # Get the latest Calico release tag from GitHub
     curl -fsSL https://api.github.com/repos/projectcalico/calico/releases/latest -o /tmp/calico-release.json
     CALICO_VERSION=$(grep -m1 '"tag_name"' /tmp/calico-release.json | sed -E 's/.*"([^"]+)".*/\1/')
