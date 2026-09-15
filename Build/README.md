@@ -123,6 +123,8 @@ Example output:
 
 ![aws-cli-ami-lookup](/Build/Image/aws-cli-ami-lookup.png)
 
+![aws-cli-ami-lookup-output](/Build/Image/aws-cli-ami-lookup-output.png)
+
 ---
 
 ## A Note on Making Changes
