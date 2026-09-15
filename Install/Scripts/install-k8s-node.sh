@@ -1250,6 +1250,9 @@ if [[ "$NODE_ROLE" == "master" && "$IS_FIRST_MASTER" == "yes" ]]; then
     # Set the Pod CIDR in the manifest to match the CIDR provided earlier
     sed -i "s#cidr: 192.168.0.0/16#cidr: ${POD_CIDR}#" /tmp/calico-custom-resources.yaml
 
+    # Set VXLAN (Always) encapsulation so pod-to-pod traffic between nodes is tunneled through a UDP port,
+    sed -i "s#encapsulation: .*#encapsulation: VXLAN#" /tmp/calico-custom-resources.yaml
+
     # Apply the Calico custom resources
     kubectl create -f /tmp/calico-custom-resources.yaml
 
