@@ -57,7 +57,7 @@ Run once per node, the script will:
 - SSH access to the bastion host, and from the bastion onward to each Kubernetes node.
 - Outbound internet access from each Kubernetes node (to `pkgs.k8s.io`, `download.docker.com`, and — for Calico — `api.github.com` and `raw.githubusercontent.com`).
 - Root access on each node (the script must be run as `root` or via `sudo`).
-- For a 3-master cluster: the Load Balancer already provisioned, listening on TCP port 6443, and passed through without TLS termination.
+- [Optional - If you have changed the Terraform and provisioned 3 master nodes] the Load Balancer already provisioned, listening on TCP port 6443, and passed through without TLS termination.
 
 ---
 
