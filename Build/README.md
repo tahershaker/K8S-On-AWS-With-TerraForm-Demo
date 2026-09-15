@@ -51,9 +51,7 @@ Running this Terraform creates, in order:
 
 ## Architecture Diagram
 
-![architecture-diagram](/Build/Terraform/image/architecture-diagram.png)
-
-> Adjust the path above to wherever you save the diagram image in this repo — it isn't committed yet.
+![architecture-diagram](/Build/Image/aws-arch.png)
 
 ---
 
