@@ -49,6 +49,14 @@ This is step 3 in the repo's overall workflow:
   chmod +x get_helm.sh
   ./get_helm.sh
   ```
+- A Docker daemon on the bastion, used as a client for registry operations in later demos. This is separate from `containerd`, which is what the cluster nodes actually use to run pods.
+  ```bash
+  sudo apt-get update
+  sudo apt-get install -y docker.io
+  sudo usermod -aG docker $USER
+  newgrp docker
+  ```
+- The Load Balancer's public IP/FQDN, from the Terraform output.
 
 ---
 
@@ -68,6 +76,8 @@ kubectl get storageclass
 ```
 
 ![storageclass](/Install/Image/storageclass.png)
+
+---
 
 ### Step 2 — Install the NGINX ingress controller
 
@@ -94,6 +104,8 @@ kubectl get pods -n ingress-nginx -o wide
 
 ![ingress](/Install/Image/ingress.png)
 
+---
+
 ### Step 3 — Confirm the Load Balancer can reach it
 
 From outside the cluster (your own machine is fine — the Load Balancer is internet-facing):
@@ -108,9 +120,91 @@ A `404` from `nginx` is the expected response at this point — it confirms the 
 
 ---
 
+### Step 4 — Install Harbor
+
+```bash
+helm repo add harbor https://helm.goharbor.io
+helm repo update
+
+helm install harbor harbor/harbor \
+  --namespace harbor --create-namespace \
+  --set expose.type=ingress \
+  --set expose.ingress.className=nginx \
+  --set expose.ingress.hosts.core=${HARBOR_HOST} \
+  --set expose.tls.enabled=true \
+  --set expose.tls.certSource=auto \
+  --set externalURL=https://${HARBOR_HOST} \
+  --set harborAdminPassword=${HARBOR_PASSWORD} \
+  --set persistence.enabled=true
+```
+
+Harbor has several components (core, jobservice, registry, database, Redis, Trivy) and can take a few minutes to settle:
+
+```bash
+kubectl get pods -n harbor -w
+```
+
+---
+
+### Step 5 — Trust Harbor's certificate on the bastion
+
+`certSource=auto` makes the chart generate its own CA and TLS certificate as a Kubernetes Secret. Find it, then trust it locally so `docker login`/`push` work without `--insecure-registry`:
+
+```bash
+kubectl get secret -n harbor | grep ingress
+# use the TLS secret name returned above in place of harbor-ingress below
+kubectl get secret harbor-ingress -n harbor -o jsonpath='{.data.ca\.crt}' | base64 -d | sudo tee /usr/local/share/ca-certificates/harbor-ca.crt
+sudo update-ca-certificates
+sudo systemctl restart docker
+```
+
+---
+
+### Step 6 — Trust the same certificate on every cluster node
+
+This is easy to miss: once pods are pulling images from Harbor, it is `containerd` on each node — not Docker on the bastion — doing the TLS handshake. Skip this and every pod scheduled against a Harbor image fails with `ImagePullBackOff` on a certificate error.
+
+From the bastion, for each node (default private IPs from the [Install README](../Install/README.md): master `10.10.20.10`, worker 1 `10.10.20.11`, worker 2 `10.10.20.12`):
+
+```bash
+for NODE_IP in 10.10.20.10 10.10.20.11 10.10.20.12; do
+  scp -i <path-to-your-key.pem> /usr/local/share/ca-certificates/harbor-ca.crt <node-user>@${NODE_IP}:/tmp/harbor-ca.crt
+  ssh -i <path-to-your-key.pem> <node-user>@${NODE_IP} \
+    "sudo cp /tmp/harbor-ca.crt /usr/local/share/ca-certificates/ && sudo update-ca-certificates && sudo systemctl restart containerd"
+done
+```
+
+Restarting `containerd` briefly interrupts `kubectl logs`/`exec` connections to that node's pods, not the pods themselves — safe for a demo, worth timing outside anything you're actively demoing live.
+
+### Step 7 — Confirm Harbor is reachable and log in
+
+Browse to `https://${HARBOR_HOST}` (your browser will warn about the self-signed certificate — that's expected, proceed past it). Log in as `admin` / the password in `HARBOR_PASSWORD`.
+
+Log the bastion's Docker client in too, ready for whichever demo needs to push images:
+
+```bash
+docker login ${HARBOR_HOST} -u admin -p ${HARBOR_PASSWORD}
+```
+
+Harbor is now ready. Each demo that needs it creates its own project inside it — see the individual demo's README.
+
+---
+
 ## Notes and Limitations
 
 - **This step is idempotent enough to re-run**, but isn't designed to be re-applied constantly — run it once after Install, then move on to the demos.
-- **`local-path-provisioner` is node-local.** Anything stored via it is pinned to whichever node the pod first scheduled on. Losing that node loses that data — acceptable for a demo, not for anything that needs to survive a node replacement.
+- **`local-path-provisioner` is node-local.** Anything stored via it — including Harbor's own database and registry storage — is pinned to whichever node the pod first scheduled on. Losing that node loses that data — acceptable for a demo, not for anything that needs to survive a node replacement.
 - **The master runs ingress-nginx too, via the toleration.** This is purely to keep the Load Balancer's target-group health checks clean across all three nodes; a real cluster would typically keep ingress off the control plane.
-- **If you've changed the Terraform's node count or topology**, no changes are needed here — the `DaemonSet` picks up however many nodes exist automatically. Only the demos' own default IPs/hostnames (documented in their individual READMEs) assume the default 1-master, 2-worker topology.
+- **Self-signed certificate.** Harbor's UI and every demo that exposes something through the same ingress will show a browser warning on first visit — expected for a demo, not something to fix here.
+- **Plain-text admin password.** `harborAdminPassword` was set directly as a Helm value for simplicity. A real deployment would pre-create the Kubernetes Secret Harbor expects and reference it instead.
+- **If you've changed the Terraform's node count or topology**, `local-path-provisioner` and `ingress-nginx` need no changes — they pick up however many nodes exist automatically. Only Step 6's node loop and the demos' own default IPs/hostnames assume the default 1-master, 2-worker topology.
+
+---
+
+## Next Action
+
+Once the cluster-wide add-ons are installed and running, you are ready to start running demos on top of the cluster. Move on to the [Demo README](../Demo/README.md).
+
+---
+
+Enjoy
