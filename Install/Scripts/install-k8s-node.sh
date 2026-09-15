@@ -751,7 +751,7 @@ if [[ "$NODE_ROLE" == "master" && "$IS_FIRST_MASTER" == "yes" ]]; then
 fi
 
 # --- Print Kubernetes Version ---
-echo "   Kubernetes Version     : $K8S_VERSION"
+echo "   Kubernetes Version     : $K8S_MAJOR_MINOR"
 
 # --- Print Os Family Type ---
 echo "   OS Family              : $OS_FAMILY"
@@ -772,8 +772,16 @@ fi
 
 #=========================================================================================
 
+echo ""
+echo -e "${GREEN} ------------------------------------${NC}"
+echo -e "${GREEN} ------ Installation Starting -------${NC}"
+echo -e "${GREEN} ------------------------------------${NC}"
+echo ""
+
+#=========================================================================================
+
 echo -e "${GREEN} Part 3: - Pre-Flight OS Preparation:${NC}"
-echo -e "${GREEN} ---------------------------------------${NC}"
+echo -e "${GREEN} ------------------------------------${NC}"
 echo ""
 
 # Disable Swap
@@ -848,7 +856,9 @@ echo ""
 # If this node is Debian family, install containerd using Docker's apt repo
 if [[ "$OS_FAMILY" == "debian" ]]; then
   # Print message that containerd installation is starting
+  echo ""
   echo -e "${YELLOW} - Installing containerd (Debian family)...${NC}"
+  echo ""
 
   # Update the apt package index
   apt-get update -y
@@ -891,7 +901,9 @@ fi
 # If this node is RHEL family, install containerd using Docker's dnf repo
 if [[ "$OS_FAMILY" == "rhel" ]]; then
   # Print message that containerd installation is starting
+  echo ""
   echo -e "${YELLOW} - Installing containerd (RHEL family)...${NC}"
+  echo ""
 
   # Install the dnf plugin needed to add a new repo
   dnf install -y dnf-plugins-core
@@ -912,6 +924,7 @@ fi
 # Print message that containerd is being configured
 echo ""
 echo -e "${YELLOW} - Configuring containerd...${NC}"
+echo ""
 
 # Create the containerd config directory if it does not already exist
 mkdir -p /etc/containerd
@@ -951,7 +964,9 @@ echo ""
 # If this node is Debian family, install the Kubernetes packages using the pkgs.k8s.io apt repo
 if [[ "$OS_FAMILY" == "debian" ]]; then
   # Print message that installation is starting
+  echo ""
   echo -e "${YELLOW} - Installing kubelet, kubeadm, kubectl (Debian family)...${NC}"
+  echo ""
 
   # Update the apt package index
   apt-get update -y
@@ -994,7 +1009,9 @@ fi
 # If this node is RHEL family, install the Kubernetes packages using the pkgs.k8s.io yum repo
 if [[ "$OS_FAMILY" == "rhel" ]]; then
   # Print message that installation is starting
+  echo ""
   echo -e "${YELLOW} - Installing kubelet, kubeadm, kubectl (RHEL family)...${NC}"
+  echo ""
 
   # Set SELinux to permissive mode, required for container network plugins
   setenforce 0
@@ -1054,10 +1071,12 @@ echo ""
 # If this is the first master node, run kubeadm init to create the cluster
 if [[ "$NODE_ROLE" == "master" && "$IS_FIRST_MASTER" == "yes" ]]; then
   # Print message that cluster initialization is starting
+  echo ""
   echo -e "${YELLOW} - Initializing the cluster with kubeadm init...${NC}"
+  echo ""
 
   # Build the base kubeadm init arguments
-  INIT_ARGS=(--kubernetes-version="v${K8S_VERSION}" --pod-network-cidr="${POD_CIDR}" --service-cidr="${SVC_CIDR}")
+  INIT_ARGS=(--kubernetes-version="v${K8S_MAJOR_MINOR}" --pod-network-cidr="${POD_CIDR}" --service-cidr="${SVC_CIDR}")
 
   # If there are 3 masters, add the control-plane endpoint and upload-certs flags
   if [[ "$MASTER_COUNT" == "3" ]]; then
@@ -1094,7 +1113,9 @@ fi
 # If this is a joining master node or a worker node, run the join command provided by the user
 if [[ ( "$NODE_ROLE" == "master" && "$IS_FIRST_MASTER" == "no" ) || "$NODE_ROLE" == "worker" ]]; then
   # Print message that this node is joining the cluster
+  echo ""
   echo -e "${YELLOW} - Joining this node to the cluster...${NC}"
+  echo ""
 
   # Run the join command collected earlier from the user
   eval "$JOIN_COMMAND"
@@ -1117,7 +1138,9 @@ if [[ "$NODE_ROLE" == "master" ]]; then
   echo ""
 
   # Print message that kubeconfig setup is starting
+  echo ""
   echo -e "${YELLOW} - Setting up kubeconfig...${NC}"
+  echo ""
 
   # Create the .kube directory in this user's home directory
   mkdir -p "$HOME/.kube"
@@ -1159,6 +1182,7 @@ if [[ "$NODE_ROLE" == "master" ]]; then
 
   # Print message that Helm installation is starting
   echo -e "${YELLOW} - Installing Helm...${NC}"
+  echo ""
 
   # Download the official Helm install script
   curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 -o /tmp/get-helm-3.sh
@@ -1193,10 +1217,12 @@ if [[ "$NODE_ROLE" == "master" && "$IS_FIRST_MASTER" == "yes" ]]; then
   if [[ "$CNI_CHOICE" == "calico" ]]; then
     # Print message that Calico installation is starting
     echo -e "${YELLOW} - Installing Calico...${NC}"
-
+    echo ""
+    
     # Get the latest Calico release tag from GitHub
-    CALICO_VERSION=$(curl -fsSL https://api.github.com/repos/projectcalico/calico/releases/latest \
-      | grep -m1 '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
+    curl -fsSL https://api.github.com/repos/projectcalico/calico/releases/latest -o /tmp/calico-release.json
+    CALICO_VERSION=$(grep -m1 '"tag_name"' /tmp/calico-release.json | sed -E 's/.*"([^"]+)".*/\1/')
+    rm -f /tmp/calico-release.json
 
     # Fail loudly if the Calico version could not be determined
     if [[ -z "$CALICO_VERSION" ]]; then
