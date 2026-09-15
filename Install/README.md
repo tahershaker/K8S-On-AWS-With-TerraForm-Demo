@@ -77,7 +77,7 @@ If you've changed the Terraform to deploy 3 masters instead of 1, the order beco
 
 ### Step 1 — Provision the infrastructure
 
-Apply the Terraform in this repository to stand up the bastion host and the Kubernetes nodes, following the instructions in the repo's main README.
+Apply the Terraform in this repository to stand up the bastion host and the Kubernetes nodes, following the instructions in the repo's main README. Please refer to this repo page for more information regarding this step [Terraform Build ReadMe](/Build/README.md)
 
 ### Step 2 — SSH into the bastion host
 
