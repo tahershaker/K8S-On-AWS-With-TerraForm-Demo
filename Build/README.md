@@ -99,6 +99,38 @@ Running this Terraform creates, in order:
 
 ---
 
+## Customizing the Deployment
+
+To change anything in this Terraform — network CIDRs, instance sizes, disk size, the OS/AMI, or anything else — edit `variables.tf` and any related object that depends on it. Changing a default in `variables.tf` is often enough on its own, but some changes (moving to a different OS family, changing the node topology) also touch the resource files directly — check the [Repository Structure](#repository-structure) table above for which file owns which resource.
+
+### Changing the OS / AMI
+
+The OS image used for the bastion and all three Kubernetes nodes is controlled by the `os-ami-*` variables in `variables.tf` (`os-ami-owner`, `os-ami-name`, `os-ami-virtualization-type`, `os-ami-architecture`, `os-ami-root-device-type`) — see `data.tf` for how these feed into the AMI lookup.
+
+To move to a different OS, version, or AMI, first find the exact AMI you want in your target region. You can look it up with the AWS CLI:
+
+```bash
+aws ec2 describe-images \
+  --region <your-region> \
+  --image-ids <ami-id> \
+  --query 'Images[0].{ID:ImageId,Name:Name,Owner:OwnerId,Description:Description,Arch:Architecture,Virt:VirtualizationType,RootDevice:RootDeviceType,State:State,Public:Public}' \
+  --output table
+```
+
+This returns the AMI's name, owning account, architecture, virtualization type, and root device type — everything the `os-ami-*` variables need. Update each variable in `variables.tf` to match what this command returns, then run `terraform plan` to confirm the new AMI resolves correctly before applying.
+
+Example output:
+
+![aws-cli-ami-lookup](/Build/Terraform/image/aws-cli-ami-lookup.png)
+
+---
+
+## A Note on Making Changes
+
+This repo is intentionally simple and transparent rather than driven by a single central config, which means a change in one place can have effects elsewhere that Terraform itself won't catch or warn you about. If you change anything here — topology, IPs, OS, node count, sizing — you're responsible for checking whether that change needs to be reflected elsewhere in the repo too, most importantly in [`install-k8s-node.sh`](../Install/README.md) and its README, which assume this repo's default setup (1 master, 2 workers, Ubuntu, the specific IPs and hostnames documented there). A clean `terraform apply` does not mean the rest of the repo is still consistent with what you actually deployed.
+
+---
+
 ## How to Use
 
 ### Step 1 — Clone the repo and move into the Terraform folder
@@ -175,3 +207,12 @@ terraform destroy
 
 ---
 
+## Script Output Example
+
+The screenshot below shows terraform init completing successfully, with all four providers (aws, random, local, tls) downloaded and the lock file created:
+
+![terraform-output-example](/Install/Image/terraform-output-example.png)
+
+The screenshot below shows terraform apply completing successfully — 40 resources added — with the full Deployment-Outputs block printed, including the bastion's public IP, the Load Balancer's public IP, the SSH key name, and each node's private IP:
+
+![terraform-output-success](/Install/Image/terraform-output-success.png)

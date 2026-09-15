@@ -234,12 +234,12 @@ You should see all the nodes in the cluster, matching the topology you built.
 
 ## Script Output Example
 
-The screenshot below shows terraform init completing successfully, with all four providers (aws, random, local, tls) downloaded and the lock file created:
+The screenshot below shows the script running interactively on a node:
 
-![terraform-output-example](/Install/Image/terraform-output-example.png)
+![script-output-example](/Install/Image/script-output-example.png)
 
-The screenshot below shows terraform apply completing successfully — 40 resources added — with the full Deployment-Outputs block printed, including the bastion's public IP, the Load Balancer's public IP, the SSH key name, and each node's private IP:
+The screenshot below shows a successful full deployment, with kubectl get nodes run confirming all 3 nodes have joined the cluster:
 
-![terraform-output-success](/Install/Image/terraform-output-success.png)
+![script-output-success](/Install/Image/script-output-success.png)
 
 ---
