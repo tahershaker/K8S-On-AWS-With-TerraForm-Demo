@@ -15,5 +15,6 @@ resource "aws_vpc" "main-vpc" {
     Name       = "demo-vpc-01"
     DeployedBy = "TerraForm"
     UsedFor    = "K8sDemo"
+    User       = "tshaker"
   }
 }

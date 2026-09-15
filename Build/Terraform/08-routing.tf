@@ -22,6 +22,7 @@ resource "aws_route_table" "pub-rt-01" {
     Name       = "demo-pub-rt-01"
     DeployedBy = "TerraForm"
     UsedFor    = "K8sDemo"
+    User       = "tshaker"
   }
 }
 
@@ -39,6 +40,7 @@ resource "aws_route_table" "priv-rt-01" {
     Name       = "demo-priv-rt-01"
     DeployedBy = "TerraForm"
     UsedFor    = "K8sDemo"
+    User       = "tshaker"
   }
 }
 

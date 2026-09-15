@@ -13,6 +13,7 @@ resource "aws_internet_gateway" "main-igw" {
     Name       = "demo-igw-01"
     DeployedBy = "TerraForm"
     UsedFor    = "K8sDemo"
+    User       = "tshaker"
   }
 }
 

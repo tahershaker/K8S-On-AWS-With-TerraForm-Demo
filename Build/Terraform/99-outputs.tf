@@ -37,9 +37,9 @@ output "Deployment-Outputs" {
   - Bastion Host Public IP:                     ${aws_instance.bastion-01.public_ip}
   - Load Balancer Public IP:                    ${aws_eip.lb-eip.public_ip}
   - SSH Key Name:                               ${aws_key_pair.demo-ssh-key-pair-01.key_name}
-  - Kube Master Node-01 Private IP:              ${aws_instance.kube-master-01.private_ip}
-  - Kube Worker Node-01 Private IP:              ${aws_instance.kube-worker-01.private_ip}
-  - Kube Worker Node-02 Private IP:              ${aws_instance.kube-worker-02.private_ip}
+  - Kube Master Node-01 Private IP:             ${aws_instance.kube-master-01.private_ip}
+  - Kube Worker Node-01 Private IP:             ${aws_instance.kube-worker-01.private_ip}
+  - Kube Worker Node-02 Private IP:             ${aws_instance.kube-worker-02.private_ip}
   ----------------------------------------------------------
   Next step: SSH to the bastion, then SSH from the bastion to each node
   using ${var.ssh-file-name} and run install-k8s-node.sh on each one.

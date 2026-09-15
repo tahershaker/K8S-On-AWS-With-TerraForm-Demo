@@ -78,11 +78,11 @@ resource "aws_instance" "bastion-01" {
     Name       = "demo-bastion-01"
     DeployedBy = "TerraForm"
     UsedFor    = "K8sDemo"
+    User       = "tshaker"
   }
 }
 
 # Create Kube Master Node in Private Subnet
-# Left bare on purpose - kubeadm is bootstrapped manually via the setup-k8s-node.sh script over SSH
 resource "aws_instance" "kube-master-01" {
   depends_on             = [aws_route_table.priv-rt-01, aws_nat_gateway.main-natgw, aws_key_pair.demo-ssh-key-pair-01]
   ami                    = data.aws_ami.ami-os.id
@@ -101,11 +101,11 @@ resource "aws_instance" "kube-master-01" {
     Name       = "demo-kube-master-01"
     DeployedBy = "TerraForm"
     UsedFor    = "K8sDemo"
+    User       = "tshaker"
   }
 }
 
 # Create Kube Worker Node 01 in Private Subnet
-# Left bare on purpose - kubeadm is bootstrapped manually via the setup-k8s-node.sh script over SSH
 resource "aws_instance" "kube-worker-01" {
   depends_on             = [aws_route_table.priv-rt-01, aws_nat_gateway.main-natgw, aws_key_pair.demo-ssh-key-pair-01]
   ami                    = data.aws_ami.ami-os.id
@@ -124,11 +124,11 @@ resource "aws_instance" "kube-worker-01" {
     Name       = "demo-kube-worker-01"
     DeployedBy = "TerraForm"
     UsedFor    = "K8sDemo"
+    User       = "tshaker"
   }
 }
 
 # Create Kube Worker Node 02 in Private Subnet
-# Left bare on purpose - kubeadm is bootstrapped manually via the setup-k8s-node.sh script over SSH
 resource "aws_instance" "kube-worker-02" {
   depends_on             = [aws_route_table.priv-rt-01, aws_nat_gateway.main-natgw, aws_key_pair.demo-ssh-key-pair-01]
   ami                    = data.aws_ami.ami-os.id
@@ -147,6 +147,7 @@ resource "aws_instance" "kube-worker-02" {
     Name       = "demo-kube-worker-02"
     DeployedBy = "TerraForm"
     UsedFor    = "K8sDemo"
+    User       = "tshaker"
   }
 }
 

@@ -20,6 +20,7 @@ resource "aws_security_group" "pub-sg-01" {
     Name       = "public-security-group-01"
     DeployedBy = "TerraForm"
     UsedFor    = "K8sDemo"
+    User       = "tshaker"
   }
 }
 
@@ -33,6 +34,7 @@ resource "aws_security_group" "priv-sg-01" {
     Name       = "private-security-group-01"
     DeployedBy = "TerraForm"
     UsedFor    = "K8sDemo"
+    User       = "tshaker"
   }
 }
 
@@ -49,7 +51,7 @@ resource "aws_security_group_rule" "pub-sg-ingress-ssh-rules-01" {
   from_port         = 22
   to_port           = 22
   protocol          = "tcp"
-  cidr_blocks       = [var.admin-ssh-cidr]
+  cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.pub-sg-01.id
 }
 

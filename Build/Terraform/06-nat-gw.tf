@@ -16,6 +16,7 @@ resource "aws_nat_gateway" "main-natgw" {
     Name       = "demo-natgw-01"
     DeployedBy = "TerraForm"
     UsedFor    = "K8sDemo"
+    User       = "tshaker"
   }
 }
 

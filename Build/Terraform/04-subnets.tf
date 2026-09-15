@@ -20,6 +20,7 @@ resource "aws_subnet" "pub-sub-01" {
     Name       = "demo-public-subnet-01"
     DeployedBy = "TerraForm"
     UsedFor    = "K8sDemo"
+    User       = "tshaker"
   }
 }
 
@@ -38,6 +39,7 @@ resource "aws_subnet" "priv-sub-01" {
     Name       = "demo-private-subnet-01"
     DeployedBy = "TerraForm"
     UsedFor    = "K8sDemo"
+    User       = "tshaker"
   }
 }
 

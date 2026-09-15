@@ -24,6 +24,7 @@ resource "aws_lb" "nlb-01" {
     Name       = "demo-nlb-01"
     DeployedBy = "TerraForm"
     UsedFor    = "K8sDemo"
+    User       = "tshaker"
   }
 }
 
@@ -43,6 +44,7 @@ resource "aws_lb_target_group" "http-tg-01" {
     Name       = "demo-http-tg-01"
     DeployedBy = "TerraForm"
     UsedFor    = "K8sDemo"
+    User       = "tshaker"
   }
 }
 
@@ -58,6 +60,7 @@ resource "aws_lb_target_group" "https-tg-01" {
     Name       = "demo-https-tg-01"
     DeployedBy = "TerraForm"
     UsedFor    = "K8sDemo"
+    User       = "tshaker"
   }
 }
 

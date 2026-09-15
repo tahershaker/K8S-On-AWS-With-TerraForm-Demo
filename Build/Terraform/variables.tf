@@ -32,12 +32,6 @@ variable "priv-sub-01-cidr" {
   default     = "10.10.20.0/24"
 }
 
-variable "admin-ssh-cidr" {
-  description = "CIDR allowed to SSH into the bastion on port 22. Defaults to open - lock this down to your own IP before deploying"
-  type        = string
-  default     = "0.0.0.0/0"
-}
-
 #========================================
 
 # Second SSH Key variables
@@ -104,13 +98,13 @@ variable "kube-master-node-size" {
 variable "kube-worker-node-size" {
   description = "EC2 instance type for the Kube worker nodes"
   type        = string
-  default     = "t3.medium"
+  default     = "t3.xlarge"
 }
 
 variable "kube-node-disk-size" {
   description = "Root volume size in GB for each Kube node"
   type        = number
-  default     = 40
+  default     = 100
 }
 
 #========================================
@@ -128,7 +122,7 @@ variable "os-ami-owner" {
 variable "os-ami-name" {
   description = "Name filter for the AMI lookup - set to the release you want, e.g. ubuntu-jammy-22.04 or ubuntu-noble-24.04"
   type        = string
-  default     = "ubuntu/images/hvm-ssd-gp3/ubuntu-resolute-26.04-amd64-server-20260604"
+  default     = "ubuntu/images/hvm-ssd-gp3/ubuntu-resolute-26.04-amd64-server-*"
 }
 
 variable "os-ami-virtualization-type" {

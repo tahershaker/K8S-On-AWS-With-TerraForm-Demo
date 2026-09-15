@@ -14,6 +14,7 @@ resource "aws_eip" "nat-gw-eip" {
     Name       = "demo-eip-nat-01"
     DeployedBy = "TerraForm"
     UsedFor    = "K8sDemo"
+    User       = "tshaker"
   }
 }
 
@@ -26,6 +27,7 @@ resource "aws_eip" "lb-eip" {
     Name       = "demo-eip-lb-01"
     DeployedBy = "TerraForm"
     UsedFor    = "K8sDemo"
+    User       = "tshaker"
   }
 }
 
