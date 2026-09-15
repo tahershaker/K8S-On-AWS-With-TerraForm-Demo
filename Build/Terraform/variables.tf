@@ -40,7 +40,7 @@ variable "priv-sub-01-cidr" {
 variable "ssh-file-name" {
   description = "Local path to write the generated SSH private key to"
   type        = string
-  default     = "./demo-ssh-key.pem"
+  default     = "demo-ssh-key.pem"
 }
 
 variable "ec2-user-name" {

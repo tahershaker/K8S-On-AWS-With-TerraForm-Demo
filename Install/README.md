@@ -246,7 +246,7 @@ The screenshot below shows a successful full deployment, with kubectl get nodes 
 
 ## Next Action
 
-Once Kubernetes is installed and configured on all your nodes, you may want to move on to the demo part. Move on to the [Demo README](../Demo/README.md)
+Once Kubernetes is installed and configured on all your nodes, you to prepare the Kubernetes cluster to run demos and application on it. Move on to the [Prep README](../Prep/README.MD)
 
 ---
 
