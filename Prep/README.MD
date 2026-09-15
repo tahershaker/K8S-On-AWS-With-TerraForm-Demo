@@ -6,7 +6,7 @@
 
 ## Description
 
-The Terraform and `install-k8s-node.sh` steps in this repo deliberately leave the cluster bare: networking, nodes, and `kubeadm` plus a CNI, nothing else. Every demo under `Demo/` needs two things the cluster doesn't have on its own — somewhere to put persistent storage, and a way to route external traffic in. Rather than each demo installing these itself, this `Prep` folder installs them once, and every demo assumes they're already there.
+The `Terraform` and `install-k8s-node.sh` steps in this repo deliberately leave the cluster bare: networking, nodes, and `kubeadm` plus a CNI, nothing else. Every demo under `Demo/` needs two things the cluster doesn't have on its own — somewhere to put persistent storage, and a way to route external traffic in. Rather than each demo installing these itself, this `Prep` folder installs them once, and every demo assumes they're already there.
 
 It is part of the [K8S-On-AWS-With-TerraForm-Demo](https://github.com/tahershaker/K8S-On-AWS-With-TerraForm-Demo) repository, and sits between the [Install](../Install/README.md) step and the [Demo](../Demo/README.md) folder in the overall workflow.
 

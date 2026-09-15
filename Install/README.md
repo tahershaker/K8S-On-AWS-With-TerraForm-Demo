@@ -169,7 +169,7 @@ The script is fully interactive from this point — answer each question as prom
 
 Repeat Steps 3 through 5 for every remaining node, in the order described above.
 
-### Step 6 — Set up `kubectl` access from the bastion
+### Step 6 — Set up `kubectl` and `Helm` access from the bastion
 
 Once every node has been bootstrapped, copy the cluster's `kubeconfig` from the master node to the bastion host, and install `kubectl` there so you can manage the cluster without SSHing further into the master each time.
 
@@ -220,6 +220,14 @@ kubectl get nodes
 ```
 
 You should see all the nodes in the cluster, matching the topology you built.
+
+Then install Helm on the bastion itself
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 -o get_helm.sh
+chmod +x get_helm.sh
+./get_helm.sh
+```
 
 ---
 
