@@ -115,36 +115,36 @@ variable "kube-node-disk-size" {
 
 #========================================
 
-# Fifth Ubuntu AMI variables
-# Update ubuntu-ami-name to move between Ubuntu releases (e.g. jammy 22.04 vs noble 24.04)
+# Fifth OS AMI variables
+# Update os-ami-name to move between releases or distros (e.g. jammy 22.04 vs noble 24.04)
 #-------------------------------------------------------------------------------------------
 
-variable "ubuntu-ami-owner" {
-  description = "AWS account ID that owns the official Canonical Ubuntu AMIs"
+variable "os-ami-owner" {
+  description = "AWS account ID that owns the AMI (099720109477 for official Canonical Ubuntu AMIs)"
   type        = string
   default     = "099720109477"
 }
 
-variable "ubuntu-ami-name" {
-  description = "Name filter for the Ubuntu AMI lookup - set to the release you want, e.g. ubuntu-jammy-22.04 or ubuntu-noble-24.04"
+variable "os-ami-name" {
+  description = "Name filter for the AMI lookup - set to the release you want, e.g. ubuntu-jammy-22.04 or ubuntu-noble-24.04"
   type        = string
-  default     = "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"
+  default     = "ubuntu/images/hvm-ssd-gp3/ubuntu-resolute-26.04-amd64-server-20260604"
 }
 
-variable "ubuntu-ami-virtualization-type" {
-  description = "Virtualization type filter for the Ubuntu AMI lookup"
+variable "os-ami-virtualization-type" {
+  description = "Virtualization type filter for the AMI lookup"
   type        = string
   default     = "hvm"
 }
 
-variable "ubuntu-ami-architecture" {
-  description = "Architecture filter for the Ubuntu AMI lookup"
+variable "os-ami-architecture" {
+  description = "Architecture filter for the AMI lookup"
   type        = string
   default     = "x86_64"
 }
 
-variable "ubuntu-ami-root-device-type" {
-  description = "Root device type filter for the Ubuntu AMI lookup"
+variable "os-ami-root-device-type" {
+  description = "Root device type filter for the AMI lookup"
   type        = string
   default     = "ebs"
 }

@@ -44,7 +44,7 @@ resource "local_file" "demo-ssh-key-pair" {
 # Create Bastion Host in Public Subnet
 resource "aws_instance" "bastion-01" {
   depends_on                  = [aws_route_table.pub-rt-01, aws_key_pair.demo-ssh-key-pair-01]
-  ami                         = data.aws_ami.ami-ubuntu.id
+  ami                         = data.aws_ami.ami-os.id
   instance_type               = var.bastion-node-size
   subnet_id                   = aws_subnet.pub-sub-01.id
   associate_public_ip_address = true
@@ -85,7 +85,7 @@ resource "aws_instance" "bastion-01" {
 # Left bare on purpose - kubeadm is bootstrapped manually via the setup-k8s-node.sh script over SSH
 resource "aws_instance" "kube-master-01" {
   depends_on             = [aws_route_table.priv-rt-01, aws_nat_gateway.main-natgw, aws_key_pair.demo-ssh-key-pair-01]
-  ami                    = data.aws_ami.ami-ubuntu.id
+  ami                    = data.aws_ami.ami-os.id
   instance_type          = var.kube-master-node-size
   subnet_id              = aws_subnet.priv-sub-01.id
   vpc_security_group_ids = [aws_security_group.priv-sg-01.id]
@@ -108,7 +108,7 @@ resource "aws_instance" "kube-master-01" {
 # Left bare on purpose - kubeadm is bootstrapped manually via the setup-k8s-node.sh script over SSH
 resource "aws_instance" "kube-worker-01" {
   depends_on             = [aws_route_table.priv-rt-01, aws_nat_gateway.main-natgw, aws_key_pair.demo-ssh-key-pair-01]
-  ami                    = data.aws_ami.ami-ubuntu.id
+  ami                    = data.aws_ami.ami-os.id
   instance_type          = var.kube-worker-node-size
   subnet_id              = aws_subnet.priv-sub-01.id
   vpc_security_group_ids = [aws_security_group.priv-sg-01.id]
@@ -131,7 +131,7 @@ resource "aws_instance" "kube-worker-01" {
 # Left bare on purpose - kubeadm is bootstrapped manually via the setup-k8s-node.sh script over SSH
 resource "aws_instance" "kube-worker-02" {
   depends_on             = [aws_route_table.priv-rt-01, aws_nat_gateway.main-natgw, aws_key_pair.demo-ssh-key-pair-01]
-  ami                    = data.aws_ami.ami-ubuntu.id
+  ami                    = data.aws_ami.ami-os.id
   instance_type          = var.kube-worker-node-size
   subnet_id              = aws_subnet.priv-sub-01.id
   vpc_security_group_ids = [aws_security_group.priv-sg-01.id]

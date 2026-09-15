@@ -42,7 +42,7 @@ output "Deployment-Outputs" {
   - Kube Worker Node-02 Private IP:              ${aws_instance.kube-worker-02.private_ip}
   ----------------------------------------------------------
   Next step: SSH to the bastion, then SSH from the bastion to each node
-  using ${var.ssh-file-name} and run setup-k8s-node.sh on each one.
+  using ${var.ssh-file-name} and run install-k8s-node.sh on each one.
   ----------------------------------------------------------
   EOF
 }
