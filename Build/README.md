@@ -218,3 +218,13 @@ The screenshot below shows `terraform init` completing successfully, with all fo
 The screenshot below shows `terraform apply` completing successfully — 40 resources added — with the full Deployment-Outputs block printed, including the bastion's public IP, the Load Balancer's public IP, the SSH key name, and each node's private IP:
 
 ![terraform-output-success](/Build/Image/terraform-output-success.png)
+
+---
+
+## Next Action
+
+Once the environment is provisioned, you need to install and configure Kubernetes on the provisioned node. Move on to the [Install README](../Install/README.md)
+
+---
+
+Enjoy

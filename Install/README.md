@@ -243,3 +243,11 @@ The screenshot below shows a successful full deployment, with kubectl get nodes 
 ![script-output-success](/Install/Image/script-output-success.png)
 
 ---
+
+## Next Action
+
+Once Kubernetes is installed and configured on all your nodes, you may want to move on to the demo part. Move on to the [Demo README](../Demo/README.md)
+
+---
+
+Enjoy
