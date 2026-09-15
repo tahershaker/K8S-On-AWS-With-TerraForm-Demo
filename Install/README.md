@@ -236,10 +236,10 @@ You should see all the nodes in the cluster, matching the topology you built.
 
 The screenshot below shows the script running interactively on a node:
 
-![script-output-example](/Install/image/script-output-example.png)
+![script-output-example](/Install/Image/script-output-example.png)
 
 The screenshot below shows a successful full deployment, with kubectl get nodes run confirming all 3 nodes have joined the cluster:
 
-![script-output-success](/Install/image/script-output-success.png)
+![script-output-success](/Install/Image/script-output-success.png)
 
 ---

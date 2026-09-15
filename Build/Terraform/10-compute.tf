@@ -32,7 +32,7 @@ resource "aws_key_pair" "demo-ssh-key-pair-01" {
 resource "local_file" "demo-ssh-key-pair" {
   depends_on      = [tls_private_key.ssh-key-pair-local-01]
   content         = tls_private_key.ssh-key-pair-local-01.private_key_pem
-  filename        = var.ssh-file-name
+  filename        = "${random_string.ssh-key-random.result}-${var.ssh-file-name}"
   file_permission = "0400"
 }
 
