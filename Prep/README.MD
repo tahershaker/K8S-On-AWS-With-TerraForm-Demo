@@ -102,7 +102,7 @@ Confirm one pod is running per node, each bound to the host network:
 kubectl get pods -n ingress-nginx -o wide
 ```
 
-![ingress](/Install/Image/ingress.png)
+![ingress](/Prep/Image/ingress.png)
 
 ---
 
@@ -116,7 +116,7 @@ curl -i http://<lb_public_eip_public_ip from your Terraform output>
 
 A `404` from `nginx` is the expected response at this point — it confirms the Load Balancer is reaching the ingress controller. There's nothing behind it to route to yet; that's what each demo adds.
 
-![curl-result](/Install/Image/curl-result.png)
+![curl-result](/Prep/Image/curl-result.png)
 
 ---
 
