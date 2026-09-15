@@ -1304,6 +1304,19 @@ if [[ "$NODE_ROLE" == "master" && "$IS_FIRST_MASTER" == "yes" ]]; then
   echo "   ----------------------------------------"
 fi
 
+echo ""
+echo -e "${GREEN} -----------------------------------------${NC}"
+echo -e "${GREEN} Please Note: If kubectl did not work, you may be using a different user.${NC}"
+echo -e "${GREEN}              You can either logout and login again and it will then work.${NC}"
+echo -e "${GREEN}              Or apply the following.${NC}"
+echo -e '${GREEN}              mkdir -p "$HOME/.kube"${NC}'
+echo -e '${GREEN}              cp -i /etc/kubernetes/admin.conf "$HOME/.kube/config"${NC}'
+echo -e '${GREEN}              chown "$(id -u):$(id -g)" "$HOME/.kube/config"${NC}'
+echo -e "${GREEN} Enjoy${NC}"
+echo -e "${GREEN} -----------------------------------------${NC}"
+echo ""
+
+
 # Print a closing message confirming this node's bootstrap is complete
 echo ""
 echo -e "${GREEN} -----------------------------------------${NC}"
