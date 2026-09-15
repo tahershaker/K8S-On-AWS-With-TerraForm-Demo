@@ -174,3 +174,4 @@ terraform destroy
 - **The Kubernetes nodes have no public IP.** The bastion is the only way in; the NAT Gateway is the only way out to the internet for the private nodes.
 
 ---
+
