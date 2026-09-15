@@ -121,7 +121,7 @@ This returns the AMI's name, owning account, architecture, virtualization type, 
 
 Example output:
 
-![aws-cli-ami-lookup](/Build/Terraform/image/aws-cli-ami-lookup.png)
+![aws-cli-ami-lookup](/Build/Image/aws-cli-ami-lookup.png)
 
 ---
 
