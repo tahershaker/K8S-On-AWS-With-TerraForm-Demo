@@ -44,7 +44,6 @@ resource "aws_security_group" "priv-sg-01" {
 #----------------------------------------------------------
 
 # Create Public Security Group Ingress SSH Rules - Bastion access only
-# var.admin-ssh-cidr defaults to 0.0.0.0/0 - lock this down to your own IP/CIDR before deploying
 resource "aws_security_group_rule" "pub-sg-ingress-ssh-rules-01" {
   depends_on        = [aws_security_group.pub-sg-01]
   type              = "ingress"
