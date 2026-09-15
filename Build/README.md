@@ -213,8 +213,8 @@ terraform destroy
 
 The screenshot below shows terraform init completing successfully, with all four providers (aws, random, local, tls) downloaded and the lock file created:
 
-![terraform-output-example](/Install/Image/terraform-output-example.png)
+![terraform-output-example](/Build/Image/terraform-output-example.png)
 
 The screenshot below shows terraform apply completing successfully — 40 resources added — with the full Deployment-Outputs block printed, including the bastion's public IP, the Load Balancer's public IP, the SSH key name, and each node's private IP:
 
-![terraform-output-success](/Install/Image/terraform-output-success.png)
+![terraform-output-success](/Build/Image/terraform-output-success.png)
