@@ -57,7 +57,7 @@ Run once per node, the script will:
 - SSH access to the bastion host, and from the bastion onward to each Kubernetes node.
 - Outbound internet access from each Kubernetes node (to `pkgs.k8s.io`, `download.docker.com`, and — for Calico — `api.github.com` and `raw.githubusercontent.com`).
 - Root access on each node (the script must be run as `root` or via `sudo`).
-- [Optional - If you have changed the Terraform and provisioned 3 master nodes] the Load Balancer already provisioned, listening on TCP port 6443, and passed through without TLS termination.
+- For a 3-master cluster: the Load Balancer already provisioned, listening on TCP port 6443, and passed through without TLS termination.
 
 ---
 
@@ -73,11 +73,45 @@ If you've changed the Terraform to deploy 3 masters instead of 1, the order beco
 
 ---
 
+## Set a Static Hostname on Each Node
+
+By default, AWS assigns each EC2 instance a hostname derived from its private IP (e.g. `ip-10-0-1-23.ec2.internal`). Kubernetes uses this hostname as the node's permanent identity the moment `kubeadm init` or `kubeadm join` runs — and if the instance is ever stopped and started again, AWS can assign it a new private IP, changing the hostname and effectively orphaning the original node from the cluster.
+
+To avoid this, set a static, meaningful hostname on each node **before** running `install-k8s-node.sh`. Run the relevant block below right after SSHing into that node.
+
+**Master node:**
+```bash
+sudo hostnamectl set-hostname k8s-master-1
+echo "127.0.1.1 k8s-master-1" | sudo tee -a /etc/hosts
+exec bash
+```
+
+**Worker node 1:**
+```bash
+sudo hostnamectl set-hostname k8s-worker-1
+echo "127.0.1.1 k8s-worker-1" | sudo tee -a /etc/hosts
+exec bash
+```
+
+**Worker node 2:**
+```bash
+sudo hostnamectl set-hostname k8s-worker-2
+echo "127.0.1.1 k8s-worker-2" | sudo tee -a /etc/hosts
+exec bash
+```
+
+Verify the change took before continuing:
+```bash
+hostname
+```
+
+---
+
 ## How to Use
 
 ### Step 1 — Provision the infrastructure
 
-Apply the Terraform in this repository to stand up the bastion host and the Kubernetes nodes, following the instructions in the repo's main README. Please refer to this repo page for more information regarding this step [Terraform Build ReadMe](/Build/README.md)
+Apply the Terraform in this repository to stand up the bastion host and the Kubernetes nodes, following the instructions in the repo's main README.
 
 ### Step 2 — SSH into the bastion host
 
@@ -93,7 +127,11 @@ From the bastion, connect to the node you're about to bootstrap (start with the 
 ssh -i <path-to-your-key.pem> <node-user>@<node-private-ip>
 ```
 
-### Step 4 — Download and run the script on that node
+### Step 4 — Set a static hostname on this node
+
+Run the block matching this node's role from the Set a Static Hostname on Each Node section above.
+
+### Step 5 — Download and run the script on that node
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/tahershaker/K8S-On-AWS-With-TerraForm-Demo/main/Install/Scripts/install-k8s-node.sh -o install-k8s-node.sh
@@ -105,7 +143,7 @@ The script is fully interactive from this point — answer each question as prom
 
 Repeat Steps 3 and 4 for every remaining node, in the order described above.
 
-### Step 5 — Set up `kubectl` access from the bastion
+### Step 6 — Set up `kubectl` access from the bastion
 
 Once every node has been bootstrapped, copy the cluster's `kubeconfig` from the master node to the bastion host, and install `kubectl` there so you can manage the cluster without SSHing further into the master each time.
 
