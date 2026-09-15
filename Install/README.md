@@ -77,33 +77,59 @@ If you've changed the Terraform to deploy 3 masters instead of 1, the order beco
 
 By default, AWS assigns each EC2 instance a hostname derived from its private IP (e.g. `ip-10-0-1-23.ec2.internal`). Kubernetes uses this hostname as the node's permanent identity the moment `kubeadm init` or `kubeadm join` runs — and if the instance is ever stopped and started again, AWS can assign it a new private IP, changing the hostname and effectively orphaning the original node from the cluster.
 
-To avoid this, set a static, meaningful hostname on each node **before** running `install-k8s-node.sh`. Run the relevant block below right after SSHing into that node.
+Setting the hostname with `hostnamectl` alone is not enough on AWS: `cloud-init` re-applies the IP-derived hostname on every reboot or stop/start unless it's explicitly told not to. AWS documents the exact steps for this per OS family in [Assign a static hostname to an Amazon EC2 Linux instance](https://repost.aws/knowledge-center/linux-static-hostname), which covers Ubuntu, RHEL/CentOS, SUSE, and Amazon Linux. This repo's default Terraform deploys **Ubuntu** nodes, so the commands below follow that guide's Ubuntu steps specifically. If you've changed the Terraform to use a different OS, use the corresponding steps from that same AWS guide instead.
 
-**Master node:**
+Run the block below on each node, right after SSHing into it and **before** running `install-k8s-node.sh`. Based on this repo's default Terraform, the nodes and their private IPs are:
+
+| Node | Private IP | Hostname to set |
+|---|---|---|
+| Master | `10.10.20.10` | `k8s-master-1` |
+| Worker 1 | `10.10.20.11` | `k8s-worker-1` |
+| Worker 2 | `10.10.20.12` | `k8s-worker-2` |
+
+**Master node (10.10.20.10):**
 ```bash
-sudo hostnamectl set-hostname k8s-master-1
-echo "127.0.1.1 k8s-master-1" | sudo tee -a /etc/hosts
+sudo hostnamectl set-hostname --static k8s-master-1
+if grep -q "^preserve_hostname" /etc/cloud/cloud.cfg 2>/dev/null; then
+  sudo sed -i 's/^preserve_hostname:.*/preserve_hostname: true/' /etc/cloud/cloud.cfg
+else
+  echo "preserve_hostname: true" | sudo tee -a /etc/cloud/cloud.cfg
+fi
+echo "127.0.0.1 k8s-master-1" | sudo tee -a /etc/hosts
 exec bash
 ```
 
-**Worker node 1:**
+**Worker node 1 (10.10.20.11):**
 ```bash
-sudo hostnamectl set-hostname k8s-worker-1
-echo "127.0.1.1 k8s-worker-1" | sudo tee -a /etc/hosts
+sudo hostnamectl set-hostname --static k8s-worker-1
+if grep -q "^preserve_hostname" /etc/cloud/cloud.cfg 2>/dev/null; then
+  sudo sed -i 's/^preserve_hostname:.*/preserve_hostname: true/' /etc/cloud/cloud.cfg
+else
+  echo "preserve_hostname: true" | sudo tee -a /etc/cloud/cloud.cfg
+fi
+echo "127.0.0.1 k8s-worker-1" | sudo tee -a /etc/hosts
 exec bash
 ```
 
-**Worker node 2:**
+**Worker node 2 (10.10.20.12):**
 ```bash
-sudo hostnamectl set-hostname k8s-worker-2
-echo "127.0.1.1 k8s-worker-2" | sudo tee -a /etc/hosts
+sudo hostnamectl set-hostname --static k8s-worker-2
+if grep -q "^preserve_hostname" /etc/cloud/cloud.cfg 2>/dev/null; then
+  sudo sed -i 's/^preserve_hostname:.*/preserve_hostname: true/' /etc/cloud/cloud.cfg
+else
+  echo "preserve_hostname: true" | sudo tee -a /etc/cloud/cloud.cfg
+fi
+echo "127.0.0.1 k8s-worker-2" | sudo tee -a /etc/hosts
 exec bash
 ```
 
 Verify the change took before continuing:
 ```bash
 hostname
+cat /etc/cloud/cloud.cfg | grep preserve_hostname
 ```
+
+> **If you've changed anything in the Terraform** — the OS used for the nodes, their private IPs, or the number of nodes — adjust this section accordingly: use the matching OS steps from the [AWS guide](https://repost.aws/knowledge-center/linux-static-hostname) linked above, update the IP table, and add or remove per-node blocks to match your actual node count.
 
 ---
 
@@ -129,7 +155,7 @@ ssh -i <path-to-your-key.pem> <node-user>@<node-private-ip>
 
 ### Step 4 — Set a static hostname on this node
 
-Run the block matching this node's role from the Set a Static Hostname on Each Node section above.
+Run the block matching this node's role from the [Set a Static Hostname on Each Node](#set-a-static-hostname-on-each-node) section above.
 
 ### Step 5 — Download and run the script on that node
 
@@ -141,7 +167,7 @@ sudo ./install-k8s-node.sh
 
 The script is fully interactive from this point — answer each question as prompted, and confirm the final summary before installation begins.
 
-Repeat Steps 3 and 4 for every remaining node, in the order described above.
+Repeat Steps 3 through 5 for every remaining node, in the order described above.
 
 ### Step 6 — Set up `kubectl` access from the bastion
 
@@ -211,5 +237,9 @@ You should see all the nodes in the cluster, matching the topology you built.
 The screenshot below shows the script running interactively on a node:
 
 ![script-output-example](/Install/image/script-output-example.png)
+
+The screenshot below shows a successful full deployment, with kubectl get nodes run confirming all 3 nodes have joined the cluster:
+
+![script-output-success](/Install/image/script-output-success.png)
 
 ---
