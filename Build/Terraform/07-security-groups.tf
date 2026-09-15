@@ -1,0 +1,135 @@
+########################################################
+###  This Module will create the Security Group(s),  ###
+###          The Security Group Rule(s),             ###  
+###       The Secuirty Groups Association(s)         ###
+########################################################
+
+#-------------------------------------------------------
+
+
+# First create the Security Group(s)
+#-----------------------------------
+
+# Create Public Security Group
+resource "aws_security_group" "pub-sg-01" {
+  name        = "public-security-group-01"
+  description = "Public Security Group allowing specific ports from the internet and denying the rest"
+  vpc_id      = aws_vpc.main-vpc.id
+
+  tags = {
+    Name       = "public-security-group-01"
+    DeployedBy = "TerraForm"
+    UsedFor    = "K8sDemo"
+  }
+}
+
+# Create Private Security Group
+resource "aws_security_group" "priv-sg-01" {
+  name        = "private-security-group-01"
+  description = "Private Security Group denying all ports from the internet"
+  vpc_id      = aws_vpc.main-vpc.id
+
+  tags = {
+    Name       = "private-security-group-01"
+    DeployedBy = "TerraForm"
+    UsedFor    = "K8sDemo"
+  }
+}
+
+#========================================
+
+# Second create the Security Group Rule(s) & Association(s)
+#----------------------------------------------------------
+
+# Create Public Security Group Ingress SSH Rules - Bastion access only
+# var.admin-ssh-cidr defaults to 0.0.0.0/0 - lock this down to your own IP/CIDR before deploying
+resource "aws_security_group_rule" "pub-sg-ingress-ssh-rules-01" {
+  depends_on        = [aws_security_group.pub-sg-01]
+  type              = "ingress"
+  from_port         = 22
+  to_port           = 22
+  protocol          = "tcp"
+  cidr_blocks       = [var.admin-ssh-cidr]
+  security_group_id = aws_security_group.pub-sg-01.id
+}
+
+# Create Public Security Group Ingress HTTP Rules - NLB listener
+resource "aws_security_group_rule" "pub-sg-ingress-http-rules-01" {
+  depends_on        = [aws_security_group.pub-sg-01]
+  type              = "ingress"
+  from_port         = 80
+  to_port           = 80
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.pub-sg-01.id
+}
+
+# Create Public Security Group Ingress HTTPS Rules - NLB listener
+resource "aws_security_group_rule" "pub-sg-ingress-htts-rules-01" {
+  depends_on        = [aws_security_group.pub-sg-01]
+  type              = "ingress"
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.pub-sg-01.id
+}
+
+# Create Public Security Group Ingress internal Rules
+resource "aws_security_group_rule" "pub-sg-ingress-internal-rules-01" {
+  depends_on        = [aws_security_group.pub-sg-01]
+  type              = "ingress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = [aws_vpc.main-vpc.cidr_block]
+  security_group_id = aws_security_group.pub-sg-01.id
+}
+
+# Create Public Security Group Egress Rules
+resource "aws_security_group_rule" "pub-sg-egress-rules-01" {
+  depends_on        = [aws_security_group.pub-sg-01]
+  type              = "egress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.pub-sg-01.id
+}
+
+# Create Private Security Group Ingress Rules - Allow traffic from VPC subnet
+resource "aws_security_group_rule" "priv-sg-ingress-rules-01" {
+  depends_on        = [aws_security_group.priv-sg-01]
+  type              = "ingress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = [aws_vpc.main-vpc.cidr_block]
+  security_group_id = aws_security_group.priv-sg-01.id
+}
+
+# Create Private Security Group Ingress Rules - Allow traffic from instances in public security group
+# Reason behind this is twofold: the bastion (public SG) needs SSH into the Kube nodes,
+# and the NLB (public SG) needs to forward HTTP/HTTPS to whichever node the ingress controller lands on
+resource "aws_security_group_rule" "priv-sg-ingress-rules-02" {
+  depends_on               = [aws_security_group.priv-sg-01]
+  type                     = "ingress"
+  from_port                = 0
+  to_port                  = 0
+  protocol                 = "-1"
+  source_security_group_id = aws_security_group.pub-sg-01.id
+  security_group_id        = aws_security_group.priv-sg-01.id
+}
+
+# Create Private Security Group Egress Rules
+resource "aws_security_group_rule" "priv-sg-egress-rules-01" {
+  depends_on        = [aws_security_group.priv-sg-01]
+  type              = "egress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.priv-sg-01.id
+}
+
+#========================================
