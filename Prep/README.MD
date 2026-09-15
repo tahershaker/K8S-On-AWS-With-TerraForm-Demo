@@ -122,6 +122,12 @@ A `404` from `nginx` is the expected response at this point — it confirms the 
 
 ### Step 4 — Install Harbor
 
+This demo uses [nip.io](https://nip.io) wildcard DNS to give Harbor a hostname without needing a real domain — `harbor.<lb-ip>.nip.io` resolves straight to the Load Balancer's IP, with nothing to configure. Replace `<lb-ip>` with your own Load Balancer's public IP (the Terraform output).
+
+If you have your own DNS name instead, you can use that in its place — but first confirm it actually points at the Load Balancer's IP and properly configured.
+
+In the command below, replace `<lb-ip>` with your Load Balancer's public IP (the Terraform output), and `<password>` with a password of your choice to log in to Harbor with:
+
 ```bash
 helm repo add harbor https://helm.goharbor.io
 helm repo update
@@ -130,11 +136,11 @@ helm install harbor harbor/harbor \
   --namespace harbor --create-namespace \
   --set expose.type=ingress \
   --set expose.ingress.className=nginx \
-  --set expose.ingress.hosts.core=${HARBOR_HOST} \
+  --set expose.ingress.hosts.core=harbor.<lb-ip>.nip.io \
   --set expose.tls.enabled=true \
   --set expose.tls.certSource=auto \
-  --set externalURL=https://${HARBOR_HOST} \
-  --set harborAdminPassword=${HARBOR_PASSWORD} \
+  --set externalURL=https://harbor.<lb-ip>.nip.io \
+  --set harborAdminPassword=<passowrd> \
   --set persistence.enabled=true
 ```
 
@@ -143,6 +149,8 @@ Harbor has several components (core, jobservice, registry, database, Redis, Triv
 ```bash
 kubectl get pods -n harbor -w
 ```
+
+![harbor-deploy](/Prep/Image/harbor-deploy.png)
 
 ---
 
@@ -166,8 +174,10 @@ This is easy to miss: once pods are pulling images from Harbor, it is `container
 
 From the bastion, for each node (default private IPs from the [Install README](../Install/README.md): master `10.10.20.10`, worker 1 `10.10.20.11`, worker 2 `10.10.20.12`):
 
+In the command below, replace `<master-ip>`, `<worker-01-ip>`, and `<worker-2-ip>` with the IP addresses of your nodes, `<path-to-your-key.pem>` with the path to your SSH key, and `<node-user>` with the OS username used to SSH into the nodes.
+
 ```bash
-for NODE_IP in 10.10.20.10 10.10.20.11 10.10.20.12; do
+for NODE_IP in <master-ip> <worker-01-ip> <worker-2-ip>; do
   scp -i <path-to-your-key.pem> /usr/local/share/ca-certificates/harbor-ca.crt <node-user>@${NODE_IP}:/tmp/harbor-ca.crt
   ssh -i <path-to-your-key.pem> <node-user>@${NODE_IP} \
     "sudo cp /tmp/harbor-ca.crt /usr/local/share/ca-certificates/ && sudo update-ca-certificates && sudo systemctl restart containerd"
