@@ -4,7 +4,7 @@
 
 ## Description
 
-`install-k8s-node.sh` is an interactive Bash script that bootstraps a single Linux node into a Kubernetes cluster using the official `kubeadm` installation method. It runs standalone on each node in turn — there is no orchestration between nodes and no SSH involved. The script asks a series of questions about the cluster you're building, validates the answers, prints a summary for confirmation, and then installs and configures everything needed for that node to join (or start) the cluster.
+`install-k8s-node.sh` (available in the Install/Scripts folder of this repo) is an interactive Bash script that bootstraps a single Linux node into a Kubernetes cluster using the official `kubeadm` installation method. It runs standalone on each node in turn — there is no orchestration between nodes and no SSH involved. The script asks a series of questions about the cluster you're building, validates the answers, prints a summary for confirmation, and then installs and configures everything needed for that node to join (or start) the cluster.
 
 It is part of the [K8S-On-AWS-With-TerraForm-Demo](https://github.com/tahershaker/K8S-On-AWS-With-TerraForm-Demo) repository, which provisions the underlying AWS infrastructure via Terraform. This script handles the node-level Kubernetes installation step that follows.
 
