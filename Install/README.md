@@ -259,11 +259,11 @@ newgrp docker
 
 The screenshot below shows the script running interactively on a node:
 
-![script-output-example-01](/Install/Image/script-output-example.png)
+![script-example](/Install/Image/script-output-example.png)
 
 The screenshot below shows a successful full deployment, with kubectl get nodes run confirming all 3 nodes have joined the cluster:
 
-![script-output-success-01](/Install/Image/script-output-success.png)
+![script-success](/Install/Image/script-output-success.png)
 
 ---
 
