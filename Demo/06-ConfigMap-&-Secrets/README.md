@@ -13,7 +13,7 @@ It shows two separate Kubernetes objects, each used the way it's meant to be use
 - **ConfigMap**, injected as an environment variable (`APP_MESSAGE`). The app already reads this variable on its `/info` endpoint — set earlier in the code specifically as a hook for this demo — so you'll see the ConfigMap's value come back live from the running pod.
 - **Secret**, mounted as a file inside the pod. The app doesn't read this one — it's mounted purely so you can inspect how a Secret looks both at rest (in the API, base64) and once mounted inside a container (plain text). That contrast is the point of this step.
 
-**This demo depends on the previous demo.** If you haven't completed it yet, go back and run Steps 1 to 7 of the [Container - Build, Push to Harbor & Deploy](../02-CONTAINER-Create-%26-Deploy_Container-From-Scratch/README.md) demo first — you need `visitor-app:1.0` already pushed to Harbor before starting here.
+**This demo depends on the previous demo.** If you haven't completed it yet, go back and run Steps 1 to 7 of the [Container - Build, Push to Harbor & Deploy](/Demo/02-Create-&-Deploy-Container-From-Scratch/README.md) demo first — you need `visitor-app:1.0` already pushed to Harbor before starting here.
 
 ---
 
@@ -25,6 +25,10 @@ It shows two separate Kubernetes objects, each used the way it's meant to be use
 
 ---
 
+| Note: This demo depends on a few steps from the [Container - Build, Push to Harbor & Deploy](/Demo/02-Create-&-Deploy-Container-From-Scratch/README.md) demo. If you haven't done it yet, go back and perform Step 1 to Step 7 there first, to make sure you're able to follow along with this demo.
+
+---
+
 ## How to Use
 
 ### Step 1 — Create the namespace
@@ -32,8 +36,6 @@ It shows two separate Kubernetes objects, each used the way it's meant to be use
 ```bash
 kubectl create namespace configmap-secrets-demo
 ```
-
-![step-1](./Image/step-1.png)
 
 ---
 
@@ -46,8 +48,6 @@ kubectl create configmap visitor-app-config \
   --namespace configmap-secrets-demo \
   --from-literal=APP_MESSAGE="Hello from a ConfigMap!"
 ```
-
-![step-2](./Image/step-2.png)
 
 ---
 
@@ -73,8 +73,6 @@ kubectl create secret generic visitor-app-secret \
   --from-literal=DB_PASSWORD="SuperSecret123!"
 ```
 
-![step-4](./Image/step-4.png)
-
 ---
 
 ### Step 5 — View the Secret
@@ -94,7 +92,7 @@ Notice the value under `data` is base64, not plain text like the ConfigMap — b
 Copy the base64 string for `DB_PASSWORD` from the previous step's output and decode it:
 
 ```bash
-echo "<paste-the-base64-value-here>" | base64 -d
+echo "<paste-the-base64-value-here>" | base64 -d; echo
 ```
 
 This should print `SuperSecret123!` back out — proving the Secret object itself gives no real protection on its own; it depends on Kubernetes' RBAC and encryption-at-rest to actually secure it.
@@ -150,8 +148,6 @@ EOF
 kubectl apply -f visitor-app-pod.yaml
 ```
 
-![step-8](./Image/step-8.png)
-
 ---
 
 ### Step 9 — Confirm the pod is running
@@ -166,45 +162,84 @@ If the pod is stuck in `ImagePullBackOff`, confirm the Harbor CA is trusted on t
 
 ---
 
-### Step 10 — Port-forward to the pod
+### Step 10 — Create a Service for the pod
 
 ```bash
-kubectl port-forward -n configmap-secrets-demo pod/visitor-app 5000:5000
+cat <<EOF > visitor-app-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: visitor-app
+  namespace: configmap-secrets-demo
+spec:
+  selector:
+    app: visitor-app
+  ports:
+  - port: 80
+    targetPort: 5000
+EOF
+kubectl apply -f visitor-app-service.yaml
+kubectl -n configmap-secrets-demo get svc
 ```
-
-Leave this running — open a second terminal on the bastion for the next step.
 
 ![step-10](./Image/step-10.png)
 
 ---
 
-### Step 11 — Confirm the ConfigMap value is live in the app
+### Step 11 — Create an Ingress for the service
 
-From the bastion's second terminal:
+Replace `<lb-ip>` with your Load Balancer's public IP.
 
 ```bash
-curl http://localhost:5000/info
+cat <<EOF > visitor-app-ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: visitor-app
+  namespace: configmap-secrets-demo
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: visitor-app-cm.<lb-ip>.nip.io
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: visitor-app
+            port:
+              number: 80
+EOF
+kubectl apply -f visitor-app-ingress.yaml
+kubectl -n configmap-secrets-demo get ingress
 ```
-
-Check `env_message` in the JSON response — it should show `Hello from a ConfigMap!`, proving the value came from the ConfigMap rather than being baked into the image.
 
 ![step-11](./Image/step-11.png)
 
 ---
 
-### Step 12 — Inspect the mounted Secret inside the pod
+### Step 12 — Confirm the ConfigMap value is live in the app
 
-```bash
-kubectl exec -n configmap-secrets-demo visitor-app -- cat /etc/secret/DB_PASSWORD
-```
-
-This prints `SuperSecret123!` in plain text. Compare this to Step 5: the same value was base64 in the API, but once Kubernetes mounts a Secret into a pod, it's presented as a plain file — the encoding only ever applied to how it was stored/transmitted, not to what the running container sees.
+Open `http://visitor-app-cm.<lb-ip>.nip.io/info` in a browser from your own machine. Check `env_message` in the JSON response — it should show `Hello from a ConfigMap!`, proving the value came from the ConfigMap rather than being baked into the image.
 
 ![step-12](./Image/step-12.png)
 
 ---
 
-### Step 13 — [Optional] Clean up
+### Step 13 — Inspect the mounted Secret inside the pod
+
+```bash
+kubectl exec -n configmap-secrets-demo visitor-app -- cat /etc/secret/DB_PASSWORD; echo
+```
+
+This prints `SuperSecret123!` in plain text. Compare this to Step 5: the same value was base64 in the API, but once Kubernetes mounts a Secret into a pod, it's presented as a plain file — the encoding only ever applied to how it was stored/transmitted, not to what the running container sees.
+
+![step-13](./Image/step-13.png)
+
+---
+
+### Step 14 — [Optional] Clean up
 
 ```bash
 kubectl delete -f visitor-app-pod.yaml
