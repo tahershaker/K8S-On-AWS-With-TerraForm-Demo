@@ -295,7 +295,7 @@ Then open `http://demo-app.<lb-ip>.nip.io` in a browser to browse the store.
 
 ![step-19](./Image/step-19.png)
 
-### Step 21 — [Optional] Clean up 
+### Step 20 — [Optional] Clean up 
 
 > Note: a later demo builds on top of this one — think twice before running this.
 
