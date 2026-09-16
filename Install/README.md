@@ -87,6 +87,8 @@ Run the block below on each node, right after SSHing into it and **before** runn
 | Worker 1 | `10.10.20.11` | `k8s-worker-1` |
 | Worker 2 | `10.10.20.12` | `k8s-worker-2` |
 
+> **If you've changed anything in the Terraform** — the OS used for the nodes, their private IPs, or the number of nodes — adjust this section accordingly: use the matching OS steps from the [AWS guide](https://repost.aws/knowledge-center/linux-static-hostname) linked above, update the IP table, and add or remove per-node blocks to match your actual node count.
+
 **Master node (10.10.20.10):**
 ```bash
 sudo hostnamectl set-hostname --static k8s-master-1
@@ -128,8 +130,6 @@ Verify the change took before continuing:
 hostname
 cat /etc/cloud/cloud.cfg | grep preserve_hostname
 ```
-
-> **If you've changed anything in the Terraform** — the OS used for the nodes, their private IPs, or the number of nodes — adjust this section accordingly: use the matching OS steps from the [AWS guide](https://repost.aws/knowledge-center/linux-static-hostname) linked above, update the IP table, and add or remove per-node blocks to match your actual node count.
 
 ---
 
