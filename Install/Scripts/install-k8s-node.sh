@@ -1223,6 +1223,9 @@ if [[ "$NODE_ROLE" == "master" && "$IS_FIRST_MASTER" == "yes" ]]; then
     helm repo add projectcalico https://docs.tigera.io/calico/charts 
     helm repo update
 
+    # Install the Calico CRDs (a separate chart from the operator itself)
+    helm template calico-crds projectcalico/crd.projectcalico.org.v1 | kubectl apply --server-side -f -
+
     # Install the Tigera operator and Calico via Helm, using the Pod CIDR set earlier
     helm install calico projectcalico/tigera-operator \
       --namespace tigera-operator \
