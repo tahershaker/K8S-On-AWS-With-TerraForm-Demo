@@ -190,6 +190,8 @@ Restarting `containerd` briefly interrupts `kubectl logs`/`exec` connections to 
 
 Browse to `https://${HARBOR_HOST}` (your browser will warn about the self-signed certificate — that's expected, proceed past it). Log in as `admin` / the password in `HARBOR_PASSWORD`.
 
+![harbor-ui](/Prep/Image/harbor-ui.png)
+
 Log the bastion's Docker client in too, ready for whichever demo needs to push images:
 
 ```bash
