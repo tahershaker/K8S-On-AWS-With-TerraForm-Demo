@@ -1219,61 +1219,69 @@ if [[ "$NODE_ROLE" == "master" && "$IS_FIRST_MASTER" == "yes" ]]; then
     echo -e "${YELLOW} - Installing Calico...${NC}"
     echo ""
 
-    # Get the latest Calico release tag from GitHub
-    curl -fsSL https://api.github.com/repos/projectcalico/calico/releases/latest -o /tmp/calico-release.json
-    CALICO_VERSION=$(grep -m1 '"tag_name"' /tmp/calico-release.json | sed -E 's/.*"([^"]+)".*/\1/')
-    rm -f /tmp/calico-release.json
+    # Add and refresh the Tigera Helm repo
+    helm repo add projectcalico https://docs.tigera.io/calico/charts 
+    helm repo update
 
-    # Fail loudly if the Calico version could not be determined
-    if [[ -z "$CALICO_VERSION" ]]; then
-      echo -e "${RED}   FAILED: Could not determine the latest Calico version from GitHub.${NC}"
+    # Install the Tigera operator and Calico via Helm, using the Pod CIDR set earlier
+    helm install calico projectcalico/tigera-operator \
+      --namespace tigera-operator \
+      --create-namespace \
+      --set installation.cni.type=Calico \
+      --set "installation.calicoNetwork.ipPools[0].cidr=${POD_CIDR}" \
+      --set "installation.calicoNetwork.ipPools[0].encapsulation=VXLAN"
+
+    # Fail loudly if the Helm install did not succeed
+    if [[ $? -ne 0 ]]; then
+      echo -e "${RED}   FAILED: Calico Helm install did not complete.${NC}"
       exit 1
     fi
 
-    # Print the Calico version that will be installed
-    echo -e "${CYAN}   Latest Calico release: ${CALICO_VERSION}${NC}"
+    # Wait for Calico to report ready before moving on
+    until kubectl get tigerastatus/calico; do sleep 2; done
+    kubectl wait tigerastatus/calico --for=condition=Available --timeout=300s
 
-    # Install the projectcalico.org/v1 CRDs
-    kubectl create -f "https://raw.githubusercontent.com/projectcalico/calico/${CALICO_VERSION}/manifests/v1_crd_projectcalico_org.yaml"
-
-    # Install the Tigera operator, which manages the Calico installation
-    kubectl create -f "https://raw.githubusercontent.com/projectcalico/calico/${CALICO_VERSION}/manifests/tigera-operator.yaml"
-
-    # Wait for the Installation CRD to be registered before applying resources that depend on it
-    echo -e "${YELLOW} - Waiting for Tigera operator CRDs to be ready...${NC}"
-    kubectl wait --for=condition=Established --timeout=60s crd/installations.operator.tigera.io
-
-    # Download the custom-resources manifest that configures Calico
-    curl -fsSL "https://raw.githubusercontent.com/projectcalico/calico/${CALICO_VERSION}/manifests/custom-resources-bpf.yaml" \
-      -o /tmp/calico-custom-resources.yaml
-
-    # Set the Pod CIDR in the manifest to match the CIDR provided earlier
-    sed -i "s#cidr: 192.168.0.0/16#cidr: ${POD_CIDR}#" /tmp/calico-custom-resources.yaml
-
-    # Set VXLAN (Always) encapsulation so pod-to-pod traffic between nodes is tunneled through a UDP port,
-    sed -i "s#encapsulation: .*#encapsulation: VXLAN#" /tmp/calico-custom-resources.yaml
-
-    # Apply the Calico custom resources
-    kubectl create -f /tmp/calico-custom-resources.yaml
+    # Fail loudly if Calico did not become available
+    if [[ $? -ne 0 ]]; then
+      echo -e "${RED}   FAILED: Calico did not become available in time.${NC}"
+      exit 1
+    fi
 
     # Confirm Calico installation completed
-    echo -e "${GREEN}   Calico ${CALICO_VERSION} installed, Pod CIDR set to ${POD_CIDR}.${NC}"
+    echo -e "${GREEN}   Calico installed successfully, Pod CIDR set to ${POD_CIDR}.${NC}"
   fi
 
-  # --- Install Cilium ---
+# --- Install Cilium ---
   if [[ "$CNI_CHOICE" == "cilium" ]]; then
     # Print message that Cilium installation is starting
     echo -e "${YELLOW} - Installing Cilium via Helm...${NC}"
+    echo ""
 
-    # Add the official Cilium Helm repo
-    helm repo add cilium https://helm.cilium.io/ > /dev/null
+    # Add and refresh the Cilium Helm repo
+    helm repo add cilium https://helm.cilium.io/
+    helm repo update
 
-    # Update local Helm repo cache
-    helm repo update > /dev/null
-
-    # Install Cilium, setting the Pod CIDR to match the CIDR provided earlier
+    # Install Cilium via Helm, using the Pod CIDR set earlier
     helm install cilium cilium/cilium --namespace kube-system \
-      --set ipam.operator.clusterPoolIPv4PodCIDRList="{${POD_CIDR}}"
+      --set "ipam.operator.clusterPoolIPv4PodCIDRList={${POD_CIDR}}" \
+      --set routingMode=tunnel \
+      --set tunnelProtocol=vxlan
+
+    # Fail loudly if the Helm install did not succeed
+    if [[ $? -ne 0 ]]; then
+      echo -e "${RED}   FAILED: Cilium Helm install did not complete.${NC}"
+      exit 1
+    fi
+
+    # Wait for the Cilium DaemonSet to be ready before moving on
+    echo -e "${YELLOW} - Waiting for Cilium to become available...${NC}"
+    kubectl -n kube-system rollout status daemonset/cilium --timeout=300s
+
+    # Fail loudly if Cilium did not become available
+    if [[ $? -ne 0 ]]; then
+      echo -e "${RED}   FAILED: Cilium did not become available in time.${NC}"
+      exit 1
+    fi
 
     # Confirm Cilium installation completed
     echo -e "${GREEN}   Cilium installed via Helm, Pod CIDR set to ${POD_CIDR}.${NC}"
