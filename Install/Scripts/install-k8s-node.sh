@@ -1323,9 +1323,9 @@ echo -e "${GREEN} -----------------------------------------${NC}"
 echo -e "${GREEN} Please Note: If kubectl did not work, you may be using a different user.${NC}"
 echo -e "${GREEN}              You can either logout and login again and it will then work.${NC}"
 echo -e "${GREEN}              Or apply the following.${NC}"
-echo -e '${GREEN}              mkdir -p "$HOME/.kube"${NC}'
-echo -e '${GREEN}              cp -i /etc/kubernetes/admin.conf "$HOME/.kube/config"${NC}'
-echo -e '${GREEN}              chown "$(id -u):$(id -g)" "$HOME/.kube/config"${NC}'
+echo -e '              mkdir -p "$HOME/.kube"'
+echo -e '              cp -i /etc/kubernetes/admin.conf "$HOME/.kube/config"'
+echo -e '              chown "$(id -u):$(id -g)" "$HOME/.kube/config"'
 echo -e "${GREEN} Enjoy${NC}"
 echo -e "${GREEN} -----------------------------------------${NC}"
 echo ""
