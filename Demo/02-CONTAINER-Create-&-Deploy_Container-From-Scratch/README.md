@@ -42,6 +42,7 @@ kubectl create namespace container-demo
 kubectl get ns
 ```
 
+
 ![step-1](./Image/step-1.png)
 
 ### Step 2 — Move into the app-files directory
