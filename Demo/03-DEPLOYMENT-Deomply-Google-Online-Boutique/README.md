@@ -297,8 +297,6 @@ Then open `http://demo-app.<lb-ip>.nip.io` in a browser to browse the store.
 
 ### Step 20 — [Optional] Clean up 
 
-> Note: a later demo builds on top of this one — think twice before running this.
-
 ```bash
 kubectl delete -f frontend-ingress.yaml
 kubectl delete -f kubernetes-manifests-harbor.yaml -n deployment-demo
