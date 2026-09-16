@@ -184,6 +184,8 @@ for NODE_IP in <master-ip> <worker-01-ip> <worker-2-ip>; do
 done
 ```
 
+![scp-cert](/Prep/Image/scp-cert.png)
+
 Restarting `containerd` briefly interrupts `kubectl logs`/`exec` connections to that node's pods, not the pods themselves — safe for a demo, worth timing outside anything you're actively demoing live.
 
 ### Step 7 — Confirm Harbor is reachable and log in
@@ -195,10 +197,12 @@ Browse to `https://${HARBOR_HOST}` (your browser will warn about the self-signed
 Log the bastion's Docker client in too, ready for whichever demo needs to push images:
 
 ```bash
-docker login ${HARBOR_HOST} -u admin -p ${HARBOR_PASSWORD}
+docker login <HARBOR_HOST> -u admin -p <HARBOR_PASSWORD>
 ```
 
-Harbor is now ready. Each demo that needs it creates its own project inside it — see the individual demo's README.
+![docker-login](/Prep/Image/docker-login.png)
+
+Harbor is now ready. Each demo that needs it creates its own project inside it — see the individual [demo's README](../Demo/README.md).
 
 ---
 
