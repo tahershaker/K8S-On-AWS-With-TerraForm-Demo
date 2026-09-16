@@ -19,7 +19,9 @@ This repo takes a cluster from nothing to fully working, then uses it to demonst
 
 ## Intention of Use
 
-This is for demonstration and proof-of-concept purposes only — not intended for production use. See each stage's own README for its specific limitations and trade-offs.
+This is for demonstration and proof-of-concept purposes only — not intended for production use.
+
+**Do not use this in a production environment.**
 
 ---
 
